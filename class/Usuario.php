@@ -1,12 +1,12 @@
 <?php
-
+//Classe Usuario e seus atributos
 class Usuario {
 
     private $idusuario;
     private $deslogin;
     private $dessenha;
     private $dtcadastro;
-
+// 
     public function getIdusuario(){
 
         return $this->idusuario;
@@ -62,7 +62,7 @@ class Usuario {
             ":ID"=>$id
         ));
         
-        if (isset($results[0])) {
+        if (count($results) > 0) {
 
             $row = $results[0];
 
@@ -75,7 +75,53 @@ class Usuario {
 
     }
 
-    public function __ToString(){
+    public static function getList(){
+
+        $sql = new Sql();
+
+        return $sql->select("SELECT * FROM tb_usuarios ORDER BY deslogin;");
+
+    }
+
+    public static function getSearch($login){
+
+        $sql = new Sql();
+
+        return $sql->select("SELECT * FROM tb_usuarios WHERE deslogin LIKE :SEARCH ORDER BY deslogin", array (
+
+            'SEARCH' =>"%".$login."%"
+
+        ));
+
+    }
+
+    public function login($login, $password){
+
+        $sql = new sql();
+
+        $results = $sql->select("SELECT * FROM tb_usuarios WHERE deslogin = :LOGIN AND dessenha = :PASSWORD", array(
+            ":LOGIN"=>$login,
+            ":PASSWORD"=>$password
+        ));
+        
+        if (count($results) > 0) {
+
+            $row = $results[0];
+
+            $this->setIdusuario($row['idusuario']);
+            $this->setDeslogin($row['deslogin']);
+            $this->setDessenha($row['dessenha']);
+            $this->setDtcadastro(new DateTime($row['dtcadastro']));
+
+        } else {
+
+            throw new Exception ("Login e/ou senha inválidos.");
+
+        }
+
+    }
+
+    public function __toString(){
         return json_encode (array(
 
             "idusuarios"=>$this->getIdusuario(),
